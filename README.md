@@ -1,5 +1,8 @@
 # LTC6903/6904 embedded-hal I2C driver crate
 
+![](https://img.shields.io/crates/v/ltc690x.svg)
+![](https://docs.rs/ltc690x/badge.svg)
+
 Rust HAL implementation (using I2C traits from embedded-hal) for Linear Technologies LTC6903/6904 programmable 1kHz to 68MHz oscillator.
 
 [Datasheet](https://www.analog.com/en/products/ltc6903.html)
