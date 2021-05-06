@@ -234,4 +234,8 @@ where
     pub fn get_frequency(&self) -> u32 {
         self.frequ
     }
+
+    pub fn free(self) -> I2C {
+        self.i2c
+    }
 }
