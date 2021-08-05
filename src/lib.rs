@@ -247,7 +247,7 @@ where
         self.frequ
     }
 
-    pub fn free(self) -> I2C {
-        self.i2c
+    pub fn free(self) -> (I2C, PIN) {
+        (self.i2c, self.out_enable)
     }
 }

@@ -2,7 +2,7 @@
 authors = ["fnafnio <fabiopungg@gmail.com>"]
 name = "ltc690x"
 edition = "2018"
-version = "0.2.0"
+version = "0.2.1"
 repository = "https://github.com/fnafnio/ltc690x/"
 license = "MIT OR Apache-2.0"
 categories = ["embedded", "no-std"]
