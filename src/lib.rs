@@ -17,18 +17,20 @@
 #![no_std]
 
 use core::result::Result;
-use embedded_hal as hal;
+use embedded_hal::{self as hal, digital::v2::OutputPin};
 
 use hal::blocking::i2c::{Read, Write, WriteRead};
 
-pub struct LTC6904<I2C>
+pub struct LTC6904<I2C, PIN>
 where
     I2C: Read + Write + WriteRead,
+    PIN: OutputPin,
 {
     i2c: I2C,
     reg: u16,
-    addr: u8,
+    addr: Address,
     frequ: u32,
+    out_enable: PIN,
 }
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
@@ -103,9 +105,10 @@ pub enum FrequencyError {
 // }
 
 #[allow(dead_code)]
-impl<I2C, E> LTC6904<I2C>
+impl<I2C, E, PIN> LTC6904<I2C, PIN>
 where
     I2C: Read<Error = E> + Write<Error = E> + WriteRead<Error = E>,
+    PIN: OutputPin,
 {
     const OCT: [(u32, u32); 16] = [
         /* 0 */ (1_039, 2_076),
@@ -140,13 +143,22 @@ where
     const FREQU_MIN: u32 = 1_039;
     const FREQU_MAX: u32 = 68_030_000;
 
-    pub fn new(i2c: I2C, address: Address) -> Self {
+    pub fn new(i2c: I2C, address: Address, out_enable: PIN) -> Self {
         Self {
             i2c,
             reg: 0,
             addr: address.into(),
             frequ: Self::FREQU_MIN,
+            out_enable,
         }
+    }
+
+    pub fn enable_output(&mut self) -> Result<(), <PIN as OutputPin>::Error> {
+        self.out_enable.set_high()
+    }
+
+    pub fn disable_output(&mut self) -> Result<(), <PIN as OutputPin>::Error> {
+        self.out_enable.set_low()
     }
 
     fn set_oct(&mut self, oct: u16) {
@@ -182,14 +194,14 @@ where
 
     fn update(&mut self) -> Result<(), E> {
         let mut buffer = [0; 2];
-        self.i2c.read(self.addr, &mut buffer)?;
+        self.i2c.read(self.addr.into(), &mut buffer)?;
         self.reg = u16::from_be_bytes(buffer);
         Ok(())
     }
 
     pub fn write_out(&mut self) -> Result<(), E> {
         let data = self.reg.to_be_bytes();
-        Ok(self.i2c.write(self.addr, &data)?)
+        Ok(self.i2c.write(self.addr.into(), &data)?)
     }
 
     pub fn set_output_conf(&mut self, output: OutputSettings) {
