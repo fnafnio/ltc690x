@@ -247,7 +247,8 @@ where
         self.frequ
     }
 
-    pub fn free(self) -> (I2C, PIN) {
-        (self.i2c, self.out_enable)
+    pub fn free(mut self) -> Result<(I2C, PIN), <PIN as OutputPin>::Error> {
+        self.disable_output()?;
+        Ok((self.i2c, self.out_enable))
     }
 }
